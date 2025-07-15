@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\DTO\PaginationDTO;
 use App\Entity\Order;
 use App\Entity\OrderItem;
 use App\Entity\Product;
@@ -78,10 +79,24 @@ class OrderService
 
     public function getOrderHistory(int $limit = 50): array
     {
-        return $this->orderRepository->findBy(
-            [],
-            ['createdAt' => 'DESC'],
-            $limit
+        return $this->orderRepository->findRecentOrders($limit);
+    }
+
+    public function getPaginatedOrders(int $page = 1, int $itemsPerPage = 5): PaginationDTO
+    {
+        // Validate page number
+        if ($page < 1) {
+            $page = 1;
+        }
+
+        $orders = $this->orderRepository->findPaginatedOrders($page, $itemsPerPage);
+        $totalOrders = $this->orderRepository->countAllOrders();
+
+        return new PaginationDTO(
+            $orders,
+            $page,
+            $itemsPerPage,
+            $totalOrders
         );
     }
 
@@ -92,6 +107,11 @@ class OrderService
 
     public function getOrdersByStatus(string $status): array
     {
-        return $this->orderRepository->findBy(['status' => $status]);
+        return $this->orderRepository->findOrdersByStatus($status);
+    }
+
+    public function getCompletedOrders(): array
+    {
+        return $this->orderRepository->findCompletedOrders();
     }
 }

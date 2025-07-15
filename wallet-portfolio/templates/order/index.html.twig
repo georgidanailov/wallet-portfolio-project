@@ -8,10 +8,21 @@
             <div class="col-12">
                 <h1 class="section-title">My Orders</h1>
                 <p class="text-center">View your purchase history and order details</p>
+
+                {# Pagination Info #}
+                {% if pagination.totalItems > 0 %}
+                    <div class="text-center">
+                        <small class="text-muted">
+                            Showing {{ ((pagination.currentPage - 1) * pagination.itemsPerPage) + 1 }} to
+                            {{ min(pagination.currentPage * pagination.itemsPerPage, pagination.totalItems) }}
+                            of {{ pagination.totalItems }} orders
+                        </small>
+                    </div>
+                {% endif %}
             </div>
         </div>
 
-        {% if orders is empty %}
+        {% if pagination.totalItems == 0 %}
             <div class="row">
                 <div class="col-12">
                     <div class="card text-center">
@@ -28,7 +39,7 @@
             </div>
         {% else %}
             <div class="row">
-                {% for order in orders %}
+                {% for order in pagination.items %}
                     <div class="col-12 mb-4">
                         <div class="card">
                             <div class="card-header">
@@ -101,6 +112,53 @@
                     </div>
                 {% endfor %}
             </div>
+
+            {% if pagination.totalPages > 1 %}
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <nav aria-label="Orders pagination">
+                                    <ul class="pagination justify-content-center mb-0">
+                                        {# Previous Page Link #}
+                                        <li class="page-item {{ pagination.hasPreviousPage ? '' : 'disabled' }}">
+                                            {% if pagination.hasPreviousPage %}
+                                                <a class="page-link" href="{{ path('app_order', {page: pagination.previousPage}) }}">
+                                                    &laquo; Previous
+                                                </a>
+                                            {% else %}
+                                                <span class="page-link">&laquo; Previous</span>
+                                            {% endif %}
+                                        </li>
+
+                                        {# Page Numbers #}
+                                        {% for pageNumber in pagination.pageNumbers %}
+                                            <li class="page-item {{ pageNumber == pagination.currentPage ? 'active' : '' }}">
+                                                {% if pageNumber == pagination.currentPage %}
+                                                    <span class="page-link">{{ pageNumber }}</span>
+                                                {% else %}
+                                                    <a class="page-link" href="{{ path('app_order', {page: pageNumber}) }}">{{ pageNumber }}</a>
+                                                {% endif %}
+                                            </li>
+                                        {% endfor %}
+
+                                        {# Next Page Link #}
+                                        <li class="page-item {{ pagination.hasNextPage ? '' : 'disabled' }}">
+                                            {% if pagination.hasNextPage %}
+                                                <a class="page-link" href="{{ path('app_order', {page: pagination.nextPage}) }}">
+                                                    Next &raquo;
+                                                </a>
+                                            {% else %}
+                                                <span class="page-link">Next &raquo;</span>
+                                            {% endif %}
+                                        </li>
+                                    </ul>
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
         {% endif %}
 
         <div class="row mt-4">
@@ -115,6 +173,29 @@
         .card-header {
             background-color: #2e3440;
             border-bottom: 1px solid #66c0f4;
+        }
+
+        .pagination .page-link {
+            color: #66c0f4;
+            border-color: #66c0f4;
+            background-color: #2e3440;
+        }
+
+        .pagination .page-link:hover {
+            background-color: #66c0f4;
+            color: #2e3440;
+        }
+
+        .pagination .page-item.active .page-link {
+            background-color: #66c0f4;
+            border-color: #66c0f4;
+            color: #2e3440;
+        }
+
+        .pagination .page-item.disabled .page-link {
+            color: #6c757d;
+            background-color: #2e3440;
+            border-color: #6c757d;
         }
     </style>
 {% endblock %}

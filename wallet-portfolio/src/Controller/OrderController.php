@@ -9,6 +9,7 @@ use App\Exception\ValidationException;
 use App\Exception\InsufficientFundsException;
 use App\Exception\ProductNotFoundException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -23,12 +24,13 @@ class OrderController extends AbstractController
     ) {}
 
     #[Route('/orders', name: 'app_order')]
-    public function index(): Response
+    public function index(Request $request): Response
     {
-        $orders = $this->orderService->getOrderHistory();
+        $page = max(1, (int) $request->query->get('page', 1));
+        $paginatedOrders = $this->orderService->getPaginatedOrders($page, 5);
 
         return $this->render('order/index.html.twig', [
-            'orders' => $orders,
+            'pagination' => $paginatedOrders,
         ]);
     }
 
@@ -69,6 +71,28 @@ class OrderController extends AbstractController
             $this->logger->error('Error creating order', ['error' => $e->getMessage()]);
             $this->addFlash('error', 'An error occurred while processing your order');
             return $this->redirectToRoute('product_show', ['id' => $id]);
+        }
+    }
+
+    #[Route('/api/orders', name: 'api_orders', methods: ['GET'])]
+    public function getOrdersApi(Request $request): JsonResponse
+    {
+        try {
+            $page = max(1, (int) $request->query->get('page', 1));
+            $itemsPerPage = min(50, max(1, (int) $request->query->get('limit', 5)));
+
+            $paginatedOrders = $this->orderService->getPaginatedOrders($page, $itemsPerPage);
+
+            return $this->json([
+                'success' => true,
+                'data' => $paginatedOrders->toArray()
+            ]);
+        } catch (\Exception $e) {
+            $this->logger->error('Error fetching orders API', ['error' => $e->getMessage()]);
+            return $this->json([
+                'success' => false,
+                'error' => 'Unable to fetch orders'
+            ], 500);
         }
     }
 }

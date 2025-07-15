@@ -30,6 +30,26 @@ class OrderRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    public function findPaginatedOrders(int $page = 1, int $limit = 5): array
+    {
+        $offset = ($page - 1) * $limit;
+
+        return $this->createQueryBuilder('o')
+            ->orderBy('o.createdAt', 'DESC')
+            ->setFirstResult($offset)
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function countAllOrders(): int
+    {
+        return $this->createQueryBuilder('o')
+            ->select('COUNT(o.id)')
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
     public function findOrdersByStatus(string $status): array
     {
         return $this->findBy(['status' => $status], ['createdAt' => 'DESC']);

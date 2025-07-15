@@ -4,6 +4,7 @@ controllers:
         namespace: App\Controller
     type: attribute
 
+# Home routes
 app_home:
     path: /
     controller: App\Controller\HomeController::index
@@ -74,4 +75,9 @@ api_wallet_balance:
 api_report:
     path: /api/report
     controller: App\Controller\ReportController::getReportData
+    methods: [GET]
+
+api_orders:
+    path: /api/orders
+    controller: App\Controller\OrderController::getOrdersApi
     methods: [GET]
