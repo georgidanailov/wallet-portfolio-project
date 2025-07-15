@@ -1,8 +1,8 @@
 # Before running this project, make sure you have the following installed:
 
-PHP 8.1 or higher
-MySQL 8.0 or higher
-Symfony CLI (optional but recommended)
+PHP 8.1 or higher  
+MySQL 8.0 or higher  
+Symfony CLI (optional but recommended)  
 
 # Setup guide:
 cd wallet-portfolio
@@ -25,8 +25,22 @@ php bin/console doctrine:fixtures:load
 # Run the application
 php -S localhost:8000 -t public/
 
-# Technical Details
-Framework: Symfony 6.x
-Database: MySQL with Doctrine ORM
-Frontend: Twig templating with Bootstrap
-Architecture: Following SOLID principles with dependency injection
+or
+
+symfony server:start
+
+# Features
+
+Wallet management (add funds, track balance)  
+Product catalog with categories  
+Purchase system with order tracking  
+Spending reports by category  
+Pagination for order history  
+
+# Technical Stack
+
+Framework: Symfony 6.x  
+Database: MySQL with Doctrine ORM  
+Frontend: Twig templating with Bootstrap  
+Architecture: SOLID principles with dependency injection  
+Patterns: Repository pattern, Service layer, DTOs  
