@@ -80,4 +80,10 @@ class OrderItem
 
         return $this;
     }
+
+    public function setOrder(Order $order)
+    {
+        $this->orderEntity = $order;
+        return $this;
+    }
 }

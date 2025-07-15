@@ -1,0 +1,122 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}My Wallet - Wallet Store{% endblock %}
+
+{% block body %}
+    <div class="container">
+        <div class="row mb-5">
+            <div class="col-12">
+                <h1 class="section-title">My Wallet</h1>
+            </div>
+            <div class="col-md-8 mx-auto">
+                <div class="card text-center">
+                    <div class="card-body py-5">
+                        <h2>Current Balance</h2>
+                        <div class="display-4 text-success mb-4">
+                            ${{ wallet ? wallet.balance|number_format(2, '.', ',') : '0.00' }}
+                        </div>
+                        <p>Ready to spend on amazing products!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-5">
+            <div class="col-md-6 mx-auto">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Add Funds</h5>
+                    </div>
+                    <div class="card-body">
+                        <form action="{{ path('wallet_add_funds') }}" method="POST">
+                            <div class="mb-3">
+                                <label for="amount" class="form-label">Amount to Add</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" class="form-control" id="amount" name="amount"
+                                           placeholder="0.00" min="0.01" step="0.01" required>
+                                </div>
+                            </div>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-success btn-lg">Add Funds</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <h2 class="section-title">Transaction History</h2>
+            </div>
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Recent Transactions</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if transactions is empty %}
+                            <div class="text-center py-5">
+                                <h5>No transactions yet</h5>
+                                <p>Your transaction history will appear here</p>
+                            </div>
+                        {% else %}
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Type</th>
+                                        <th>Description</th>
+                                        <th class="text-end">Amount</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for transaction in transactions %}
+                                        <tr>
+                                            <td>{{ transaction.createdAt|date('M d, Y H:i') }}</td>
+                                            <td>
+                                                {% if transaction.type == 'add' %}
+                                                    <span class="badge bg-success">Added</span>
+                                                {% else %}
+                                                    <span class="badge bg-danger">Spent</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ transaction.description }}</td>
+                                            <td class="text-end">
+                                                {% if transaction.type == 'add' %}
+                                                    <span class="text-success">+${{ transaction.amount|number_format(2, '.', ',') }}</span>
+                                                {% else %}
+                                                    <span class="text-danger">-${{ transaction.amount|number_format(2, '.', ',') }}</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .input-group-text {
+            background-color: #2e3440;
+            border: 1px solid #66c0f4;
+            color: #c7d5e0;
+        }
+
+        .table {
+            color: #c7d5e0;
+        }
+
+        .card-header {
+            background-color: #2e3440;
+            border-bottom: 1px solid #66c0f4;
+        }
+    </style>
+{% endblock %}

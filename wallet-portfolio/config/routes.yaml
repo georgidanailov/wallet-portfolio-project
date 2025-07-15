@@ -3,3 +3,75 @@ controllers:
         path: ../src/Controller/
         namespace: App\Controller
     type: attribute
+
+app_home:
+    path: /
+    controller: App\Controller\HomeController::index
+    methods: [GET]
+
+# Wallet routes
+app_wallet:
+    path: /wallet
+    controller: App\Controller\WalletController::index
+    methods: [GET]
+
+wallet_add_funds:
+    path: /wallet/add-funds
+    controller: App\Controller\WalletController::addFunds
+    methods: [POST]
+
+# Product routes
+app_product:
+    path: /products
+    controller: App\Controller\ProductController::index
+    methods: [GET]
+
+product_show:
+    path: /product/{id}
+    controller: App\Controller\ProductController::show
+    methods: [GET]
+    requirements:
+        id: '\d+'
+
+products_by_category:
+    path: /products/category/{id}
+    controller: App\Controller\ProductController::byCategory
+    methods: [GET]
+    requirements:
+        id: '\d+'
+
+# Category routes
+app_category:
+    path: /categories
+    controller: App\Controller\CategoryController::index
+    methods: [GET]
+
+# Order routes
+app_order:
+    path: /orders
+    controller: App\Controller\OrderController::index
+    methods: [GET]
+
+buy_product:
+    path: /buy/{id}
+    controller: App\Controller\OrderController::buyProduct
+    methods: [POST]
+    requirements:
+        id: '\d+'
+
+# Report routes
+app_report:
+    path: /report
+    controller: App\Controller\ReportController::index
+    methods: [GET]
+
+# API routes
+api_wallet_balance:
+    path: /api/wallet-balance
+    controller: App\Controller\WalletController::getWalletBalance
+    methods: [GET]
+
+api_report:
+    path: /api/report
+    controller: App\Controller\ReportController::getReportData
+    methods: [GET]

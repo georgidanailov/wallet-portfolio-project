@@ -1,0 +1,97 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ category.name }} - Wallet Store{% endblock %}
+
+{% block body %}
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-12">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item">
+                            <a href="{{ path('app_home') }}">Home</a>
+                        </li>
+                        <li class="breadcrumb-item">
+                            <a href="{{ path('app_category') }}">Categories</a>
+                        </li>
+                        <li class="breadcrumb-item active">{{ category.name }}</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h1 class="section-title">{{ category.name }}</h1>
+                        <p>{{ products|length }} product{{ products|length != 1 ? 's' : '' }} available</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if products is empty %}
+            <div class="row">
+                <div class="col-12">
+                    <div class="card text-center">
+                        <div class="card-body py-5">
+                            <h5>No products in this category</h5>
+                            <p>Products will appear here once they're added to this category</p>
+                            <div class="d-flex justify-content-center gap-3 flex-wrap">
+                                <a href="{{ path('app_category') }}" class="btn btn-primary">Browse Other Categories</a>
+                                <a href="{{ path('app_product') }}" class="btn btn-outline-secondary">All Products</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="row">
+                {% for product in products %}
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h6 class="card-title">{{ product.name }}</h6>
+                                <h5 class="text-success mb-3">${{ product.price|number_format(2, '.', ',') }}</h5>
+
+                                <form action="{{ path('buy_product', {'id': product.id}) }}" method="POST" class="mb-2">
+                                    <div class="d-flex gap-2 mb-2">
+                                        <input type="number" name="quantity" class="form-control"
+                                               value="1" min="1" style="width: 80px;">
+                                        <button type="submit" class="btn btn-success">Buy Now</button>
+                                    </div>
+                                </form>
+                                <a href="{{ path('product_show', {'id': product.id}) }}"
+                                   class="btn btn-outline-primary btn-sm w-100">View Details</a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <div class="row mt-5">
+            <div class="col-12 text-center">
+                <a href="{{ path('app_category') }}" class="btn btn-outline-primary me-2">Back to Categories</a>
+                <a href="{{ path('app_product') }}" class="btn btn-outline-secondary">All Products</a>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .breadcrumb {
+            background-color: #2e3440;
+            border: 1px solid #66c0f4;
+        }
+
+        .breadcrumb-item a {
+            color: #66c0f4;
+            text-decoration: none;
+        }
+
+        .breadcrumb-item.active {
+            color: #c7d5e0;
+        }
+    </style>
+{% endblock %}

@@ -16,28 +16,30 @@ class WalletRepository extends ServiceEntityRepository
         parent::__construct($registry, Wallet::class);
     }
 
-//    /**
-//     * @return Wallet[] Returns an array of Wallet objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('w')
-//            ->andWhere('w.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('w.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
+    public function findOrCreateDefaultWallet(): Wallet
+    {
+        $wallet = $this->findOneBy([]);
 
-//    public function findOneBySomeField($value): ?Wallet
-//    {
-//        return $this->createQueryBuilder('w')
-//            ->andWhere('w.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+        if (!$wallet) {
+            $wallet = new Wallet();
+            $wallet->setBalance(0.00);
+            $this->getEntityManager()->persist($wallet);
+            $this->getEntityManager()->flush();
+        }
+
+        return $wallet;
+    }
+
+    public function updateBalance(Wallet $wallet, float $newBalance): void
+    {
+        $wallet->setBalance($newBalance);
+        $this->getEntityManager()->persist($wallet);
+        $this->getEntityManager()->flush();
+    }
+
+    public function hasEnoughFunds(float $amount): bool
+    {
+        $wallet = $this->findOrCreateDefaultWallet();
+        return $wallet->getBalance() >= $amount;
+    }
 }

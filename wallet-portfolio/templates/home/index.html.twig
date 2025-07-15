@@ -1,0 +1,49 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Home - Wallet Store{% endblock %}
+
+{% block body %}
+    <div class="container">
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="card text-center">
+                    <div class="card-body py-5">
+                        <h1 class="section-title mb-4">Welcome to Wallet Store</h1>
+                        <p class="mb-4">Your digital marketplace for amazing products. Add funds to your wallet and start shopping!</p>
+                        <div class="d-flex justify-content-center gap-3 flex-wrap">
+                            <a href="{{ path('app_wallet') }}" class="btn btn-primary btn-lg">My Wallet</a>
+                            <a href="{{ path('app_product') }}" class="btn btn-success btn-lg">Browse Products</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <h2 class="section-title">Quick Actions</h2>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Add Funds</h5>
+                        <p class="card-text">Top up your wallet to start shopping</p>
+                        <form action="{{ path('wallet_add_funds') }}" method="POST" class="d-flex gap-2">
+                            <input type="number" name="amount" class="form-control" placeholder="Amount" min="1" step="0.01" required>
+                            <button type="submit" class="btn btn-success">Add</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Your Activity</h5>
+                        <p class="card-text">View your transaction history and spending patterns</p>
+                        <a href="{{ path('app_wallet') }}" class="btn btn-primary">View History</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

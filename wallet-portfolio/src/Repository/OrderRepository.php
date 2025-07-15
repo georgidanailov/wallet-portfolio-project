@@ -16,28 +16,54 @@ class OrderRepository extends ServiceEntityRepository
         parent::__construct($registry, Order::class);
     }
 
-//    /**
-//     * @return Order[] Returns an array of Order objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('o')
-//            ->andWhere('o.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('o.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
+    public function findCompletedOrders(): array
+    {
+        return $this->findBy(['status' => 'completed'], ['createdAt' => 'DESC']);
+    }
 
-//    public function findOneBySomeField($value): ?Order
-//    {
-//        return $this->createQueryBuilder('o')
-//            ->andWhere('o.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+    public function findRecentOrders(int $limit = 50): array
+    {
+        return $this->createQueryBuilder('o')
+            ->orderBy('o.createdAt', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findOrdersByStatus(string $status): array
+    {
+        return $this->findBy(['status' => $status], ['createdAt' => 'DESC']);
+    }
+
+    public function getTotalOrdersCount(): int
+    {
+        return $this->createQueryBuilder('o')
+            ->select('COUNT(o.id)')
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    public function getTotalSpentAmount(): float
+    {
+        $result = $this->createQueryBuilder('o')
+            ->select('SUM(o.totalAmount)')
+            ->andWhere('o.status = :status')
+            ->setParameter('status', 'completed')
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        return $result ? (float)$result : 0.0;
+    }
+
+    public function findOrdersInDateRange(\DateTimeInterface $startDate, \DateTimeInterface $endDate): array
+    {
+        return $this->createQueryBuilder('o')
+            ->andWhere('o.createdAt >= :startDate')
+            ->andWhere('o.createdAt <= :endDate')
+            ->setParameter('startDate', $startDate)
+            ->setParameter('endDate', $endDate)
+            ->orderBy('o.createdAt', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
 }

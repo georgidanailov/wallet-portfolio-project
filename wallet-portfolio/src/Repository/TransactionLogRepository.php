@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\TransactionLog;
+use App\Entity\Wallet;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -16,28 +17,54 @@ class TransactionLogRepository extends ServiceEntityRepository
         parent::__construct($registry, TransactionLog::class);
     }
 
-//    /**
-//     * @return TransactionLog[] Returns an array of TransactionLog objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('t')
-//            ->andWhere('t.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('t.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
+    public function findRecentTransactions(Wallet $wallet, int $limit = 10): array
+    {
+        return $this->createQueryBuilder('t')
+            ->andWhere('t.wallet = :wallet')
+            ->setParameter('wallet', $wallet)
+            ->orderBy('t.createdAt', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
 
-//    public function findOneBySomeField($value): ?TransactionLog
-//    {
-//        return $this->createQueryBuilder('t')
-//            ->andWhere('t.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+    public function findTransactionsByType(Wallet $wallet, string $type): array
+    {
+        return $this->createQueryBuilder('t')
+            ->andWhere('t.wallet = :wallet')
+            ->andWhere('t.type = :type')
+            ->setParameter('wallet', $wallet)
+            ->setParameter('type', $type)
+            ->orderBy('t.createdAt', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function getTotalSpentAmount(Wallet $wallet): float
+    {
+        $result = $this->createQueryBuilder('t')
+            ->select('SUM(t.amount)')
+            ->andWhere('t.wallet = :wallet')
+            ->andWhere('t.type = :type')
+            ->setParameter('wallet', $wallet)
+            ->setParameter('type', 'spend')
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        return $result ? (float)$result : 0.0;
+    }
+
+    public function getTotalAddedAmount(Wallet $wallet): float
+    {
+        $result = $this->createQueryBuilder('t')
+            ->select('SUM(t.amount)')
+            ->andWhere('t.wallet = :wallet')
+            ->andWhere('t.type = :type')
+            ->setParameter('wallet', $wallet)
+            ->setParameter('type', 'add')
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        return $result ? (float)$result : 0.0;
+    }
 }

@@ -1,17 +1,194 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="UTF-8">
-        <title>{% block title %}Welcome!{% endblock %}</title>
-        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text><text y=%221.3em%22 x=%220.2em%22 font-size=%2276%22 fill=%22%23fff%22>sf</text></svg>">
-        {% block stylesheets %}
-        {% endblock %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Wallet Store{% endblock %}</title>
 
-        {% block javascripts %}
-            {% block importmap %}{{ importmap('app') }}{% endblock %}
-        {% endblock %}
-    </head>
-    <body>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+        body {
+            background-color: #1b2838;
+            color: #c7d5e0;
+        }
+
+        .navbar {
+            background-color: rgba(27, 40, 56, 0.95);
+            border-bottom: 1px solid #66c0f4;
+        }
+
+        .navbar-brand {
+            color: #66c0f4 !important;
+            font-weight: bold;
+        }
+
+        .navbar-nav .nav-link {
+            color: #c7d5e0 !important;
+        }
+
+        .navbar-nav .nav-link:hover {
+            color: #66c0f4 !important;
+        }
+
+        .wallet-balance {
+            background-color: #90ba3c;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+
+        .wallet-balance:hover {
+            background-color: #a4d65e;
+            color: white;
+        }
+
+        .card {
+            background-color: #2e3440;
+            border: 1px solid #66c0f4;
+            color: #c7d5e0;
+        }
+
+        .btn-primary {
+            background-color: #66c0f4;
+            border-color: #66c0f4;
+        }
+
+        .btn-success {
+            background-color: #90ba3c;
+            border-color: #90ba3c;
+        }
+
+        .section-title {
+            color: #66c0f4;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .alert {
+            border: none;
+        }
+
+        .alert-success {
+            background-color: rgba(144, 186, 60, 0.2);
+            color: #90ba3c;
+        }
+
+        .alert-danger {
+            background-color: rgba(220, 53, 69, 0.2);
+            color: #ff6b6b;
+        }
+
+        .form-control {
+            background-color: #2e3440;
+            border: 1px solid #66c0f4;
+            color: #c7d5e0;
+        }
+
+        .form-control:focus {
+            background-color: #2e3440;
+            border-color: #66c0f4;
+            color: #c7d5e0;
+            box-shadow: 0 0 0 0.2rem rgba(102, 192, 244, 0.25);
+        }
+    </style>
+
+    {% block stylesheets %}{% endblock %}
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{{ path('app_home') }}">
+            <i class="bi bi-wallet2"></i> Wallet Store
+        </a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ path('app_home') }}">
+                        <i class="bi bi-house"></i> Home
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ path('app_product') }}">
+                        <i class="bi bi-grid"></i> Products
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ path('app_category') }}">
+                        <i class="bi bi-tags"></i> Categories
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ path('app_wallet') }}">
+                        <i class="bi bi-wallet"></i> My Wallet
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ path('app_order') }}">
+                        <i class="bi bi-bag-check"></i> My Orders
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ path('app_report') }}">
+                        <i class="bi bi-graph-up"></i> Reports
+                    </a>
+                </li>
+            </ul>
+
+            <div class="navbar-nav">
+                <a href="{{ path('app_wallet') }}" class="wallet-balance text-decoration-none">
+                    <i class="bi bi-cash-coin"></i> $<span id="walletBalance">0.00</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div style="margin-top: 80px; padding: 20px 0;">
+    <div class="container-fluid">
+        {% for type, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ type == 'error' ? 'danger' : type }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endfor %}
+
         {% block body %}{% endblock %}
-    </body>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    function updateWalletBalance() {
+        fetch('/api/wallet-balance')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('walletBalance').textContent = parseFloat(data.balance).toFixed(2);
+            })
+            .catch(() => {
+                console.log('Could not fetch wallet balance');
+            });
+    }
+
+    window.addEventListener('load', updateWalletBalance);
+    window.addEventListener('pageshow', updateWalletBalance);
+    document.addEventListener('visibilitychange', function() {
+        if (!document.hidden) {
+            updateWalletBalance();
+        }
+    });
+</script>
+
+{% block javascripts %}{% endblock %}
+</body>
 </html>
