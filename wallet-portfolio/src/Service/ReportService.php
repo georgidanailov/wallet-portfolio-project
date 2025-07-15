@@ -2,8 +2,6 @@
 
 namespace App\Service;
 
-use App\Repository\OrderRepository;
-use App\Repository\CategoryRepository;
 use App\Repository\OrderItemRepository;
 use App\DTO\CategorySpendingDTO;
 use App\DTO\SpendingReportDTO;
@@ -11,93 +9,46 @@ use App\DTO\SpendingReportDTO;
 class ReportService
 {
     public function __construct(
-        private OrderRepository $orderRepository,
-        private CategoryRepository $categoryRepository,
         private OrderItemRepository $orderItemRepository
     ) {}
 
     public function generateSpendingReport(): SpendingReportDTO
     {
-        $completedOrders = $this->orderRepository->findBy(['status' => 'completed']);
-        $categories = $this->categoryRepository->findAll();
+        $categoryData = $this->orderItemRepository->getSpendingReportData();
 
-        $categorySpendingData = [];
-        $totalSpent = 0;
-        $totalOrders = count($completedOrders);
-        $totalItems = 0;
+        $totals = $this->orderItemRepository->getOverallTotals();
 
-        foreach ($categories as $category) {
-            $categorySpending = $this->calculateCategorySpending($category);
-
-            if ($categorySpending->getTotalSpent() > 0) {
-                $categorySpendingData[] = $categorySpending;
-                $totalSpent += $categorySpending->getTotalSpent();
-            }
-        }
-
-        // Calculate total items across all categories
-        foreach ($completedOrders as $order) {
-            foreach ($order->getOrderItems() as $orderItem) {
-                $totalItems += $orderItem->getQuantity();
-            }
-        }
-
-        // Sort categories by spending (highest first)
-        usort($categorySpendingData, function(CategorySpendingDTO $a, CategorySpendingDTO $b) {
-            return $b->getTotalSpent() <=> $a->getTotalSpent();
-        });
+        $categorySpendingDTOs = array_map(
+            fn($data) => new CategorySpendingDTO(
+                $data['categoryName'],
+                (float) $data['totalSpent'],
+                (int) $data['orderCount'],
+                (int) $data['totalQuantity']
+            ),
+            $categoryData
+        );
 
         return new SpendingReportDTO(
-            $categorySpendingData,
-            $totalSpent,
-            $totalOrders,
-            $totalItems
-        );
-    }
-
-    private function calculateCategorySpending($category): CategorySpendingDTO
-    {
-        $totalSpent = 0;
-        $orderCount = 0;
-        $totalQuantity = 0;
-        $processedOrders = [];
-
-        foreach ($category->getProducts() as $product) {
-
-            $orderItems = $this->orderItemRepository->findBy(['product' => $product]);
-
-            foreach ($orderItems as $orderItem) {
-
-                if ($orderItem->getOrderEntity()->getStatus() === 'completed') {
-                    $itemTotal = $orderItem->getQuantity() * $orderItem->getPrice();
-                    $totalSpent += $itemTotal;
-                    $totalQuantity += $orderItem->getQuantity();
-
-                    $orderId = $orderItem->getOrderEntity()->getId();
-                    if (!in_array($orderId, $processedOrders)) {
-                        $orderCount++;
-                        $processedOrders[] = $orderId;
-                    }
-                }
-            }
-        }
-
-        return new CategorySpendingDTO(
-            $category->getName(),
-            $totalSpent,
-            $orderCount,
-            $totalQuantity
+            $categorySpendingDTOs,
+            (float) ($totals['totalSpent'] ?? 0),
+            (int) ($totals['totalOrders'] ?? 0),
+            (int) ($totals['totalItems'] ?? 0)
         );
     }
 
     public function getCategorySpending(int $categoryId): CategorySpendingDTO
     {
-        $category = $this->categoryRepository->find($categoryId);
+        $data = $this->orderItemRepository->getCategorySpendingById($categoryId);
 
-        if (!$category) {
-            throw new \InvalidArgumentException('Category not found');
+        if (!$data) {
+            throw new \InvalidArgumentException('Category not found or has no purchases');
         }
 
-        return $this->calculateCategorySpending($category);
+        return new CategorySpendingDTO(
+            $data['categoryName'],
+            (float) $data['totalSpent'],
+            (int) $data['orderCount'],
+            (int) $data['totalQuantity']
+        );
     }
 }

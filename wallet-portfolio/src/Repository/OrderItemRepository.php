@@ -67,24 +67,6 @@ class OrderItemRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    public function getCategorySpendingData(Category $category): array
-    {
-        return $this->createQueryBuilder('oi')
-            ->select('
-                SUM(oi.quantity * oi.price) as totalSpent,
-                COUNT(DISTINCT oi.orderEntity) as orderCount,
-                SUM(oi.quantity) as totalQuantity
-            ')
-            ->join('oi.product', 'p')
-            ->join('oi.orderEntity', 'o')
-            ->andWhere('p.category = :category')
-            ->andWhere('o.status = :status')
-            ->setParameter('category', $category)
-            ->setParameter('status', 'completed')
-            ->getQuery()
-            ->getSingleResult();
-    }
-
     public function getTotalItemsSold(): int
     {
         $result = $this->createQueryBuilder('oi')
@@ -96,5 +78,72 @@ class OrderItemRepository extends ServiceEntityRepository
             ->getSingleScalarResult();
 
         return $result ? (int)$result : 0;
+    }
+
+    /**
+     * Get spending report data with a single optimized query
+     * Returns category spending data in one database call
+     */
+    public function getSpendingReportData(): array
+    {
+        return $this->createQueryBuilder('oi')
+            ->select('
+                c.name as categoryName,
+                SUM(oi.quantity * oi.price) as totalSpent,
+                COUNT(DISTINCT o.id) as orderCount,
+                SUM(oi.quantity) as totalQuantity
+            ')
+            ->join('oi.product', 'p')
+            ->join('p.category', 'c')
+            ->join('oi.orderEntity', 'o')
+            ->where('o.status = :status')
+            ->setParameter('status', 'completed')
+            ->groupBy('c.id, c.name')
+            ->having('SUM(oi.quantity * oi.price) > 0')
+            ->orderBy('totalSpent', 'DESC')
+            ->getQuery()
+            ->getArrayResult();
+    }
+
+    /**
+     * Get overall totals with a single query
+     */
+    public function getOverallTotals(): array
+    {
+        return $this->createQueryBuilder('oi')
+            ->select('
+                SUM(oi.quantity * oi.price) as totalSpent,
+                COUNT(DISTINCT o.id) as totalOrders,
+                SUM(oi.quantity) as totalItems
+            ')
+            ->join('oi.orderEntity', 'o')
+            ->where('o.status = :status')
+            ->setParameter('status', 'completed')
+            ->getQuery()
+            ->getSingleResult();
+    }
+
+    /**
+     * Get category spending data by category ID
+     */
+    public function getCategorySpendingById(int $categoryId): ?array
+    {
+        return $this->createQueryBuilder('oi')
+            ->select('
+                c.name as categoryName,
+                SUM(oi.quantity * oi.price) as totalSpent,
+                COUNT(DISTINCT o.id) as orderCount,
+                SUM(oi.quantity) as totalQuantity
+            ')
+            ->join('oi.product', 'p')
+            ->join('p.category', 'c')
+            ->join('oi.orderEntity', 'o')
+            ->where('o.status = :status')
+            ->andWhere('c.id = :categoryId')
+            ->setParameter('status', 'completed')
+            ->setParameter('categoryId', $categoryId)
+            ->groupBy('c.id, c.name')
+            ->getQuery()
+            ->getOneOrNullResult();
     }
 }
